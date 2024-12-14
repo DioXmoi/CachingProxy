@@ -4,23 +4,26 @@
 project ("CachingProxy" VERSION 1.0)
 
 
-add_library(caching_proxy_compiler_flags INTERFACE)
-
-
-target_compile_features(caching_proxy_compiler_flags INTERFACE cxx_std_20)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file(CachingProxyConfig.h.in CachingProxyConfig.h)
 
+include_directories("../boost_1_86_0")
 
-# add the executable
-add_executable(CachingProxy CachingProxy.cpp)
+add_executable(CachingProxy CachingProxy.cpp) 
 
-
-target_link_libraries(CachingProxy PUBLIC caching_proxy_compiler_flags)
-
-
-#It is necessary to find CachingProxyConfig.h
 target_include_directories(CachingProxy PUBLIC 
                           "${PROJECT_BINARY_DIR}"
-)
+                          )
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64-bit
+    target_link_libraries(CachingProxy "../boost_1_86_0/bin/x64/lib")
+    message(STATUS "Building for 64-bit architecture")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4) # 32-bit
+    target_link_libraries(CachingProxy "../boost_1_86_0/bin/x86/lib")
+    message(STATUS "Building for 32-bit architecture")
+else()
+    message(FATAL_ERROR "Unsupported architecture")
+endif()
