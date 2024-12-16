@@ -41,3 +41,5 @@ int main(int argc, char* const argv[]) {
 }
 
 //caching-proxy --port <number> --origin <url>
+
+//--memory-cache: Should use a Memory Cache that will be cleaned when the process finishes?

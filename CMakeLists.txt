@@ -11,7 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 configure_file(CachingProxyConfig.h.in CachingProxyConfig.h)
 
 
-add_subdirectory(CommandLine)
+add_subdirectory(CLI)
+add_subdirectory(Cache)
 
 
 # Указываем CMake, где искать модули конфигурации.
@@ -38,9 +39,14 @@ else()
 endif()
 
 
-target_link_libraries(CachingProxy PUBLIC CommandLine)
+target_link_libraries(CachingProxy PUBLIC 
+                      CLI 
+                      Cache
+                      )
+
 
 target_include_directories(CachingProxy PUBLIC 
                           "${PROJECT_BINARY_DIR}"
-                          "${PROJECT_SOURCE_DIR}/CommandLine"
+                          "${PROJECT_SOURCE_DIR}/CLI"
+                          "${PROJECT_SOURCE_DIR}/Cache"
                           )
