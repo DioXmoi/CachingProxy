@@ -5,48 +5,64 @@ project ("CachingProxy" VERSION 1.0)
 
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# configure a header file to pass some of the CMake settings to the source code
-configure_file(CachingProxyConfig.h.in CachingProxyConfig.h)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-add_subdirectory(CLI)
-add_subdirectory(Cache)
+# Путь к папке с Boost
+set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_86_0")
+
+# Путь к папке с заголовочными файлами Boost
+set(Boost_INCLUDE_DIR "${BOOST_ROOT}")
 
 
 # Указываем CMake, где искать модули конфигурации.
 if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64-bit
-    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_86_0/bin/x64/lib/cmake/")
+    # Путь к папке с файлами .cmake, который содержит конфигурационную информацию о boost 
+    set(CMAKE_PREFIX_PATH "${BOOST_ROOT}/bin/x64/lib/cmake/")
+    set(Boost_DIR "${BOOST_ROOT}/bin/x64/lib/cmake/")
     message(STATUS "Building for 64-bit architecture")
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4) # 32-bit
-    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_86_0/bin/x86/lib/cmake/")
+    # Путь к папке с файлами .cmake, который содержит конфигурационную информацию о boost 
+    set(CMAKE_PREFIX_PATH "${BOOST_ROOT}/bin/x86/lib/cmake/")
+    set(Boost_DIR "${BOOST_ROOT}/bin/x86/lib/cmake/")
     message(STATUS "Building for 32-bit architecture")
 else()
     message(FATAL_ERROR "Unsupported architecture")
 endif()
 
-# Находим пакет Boost, требуя программу options.
-find_package(Boost REQUIRED COMPONENTS program_options)
+set(Boost_INCLUDE_DIRS "${BOOST_ROOT}")
 
+# Указываем, что нужно искать boost через заданные нами параметры, а не через стандартный поиск cmake
+find_package(Boost COMPONENTS 
+             program_options  
+             system
+             REQUIRED
+            )
+
+
+# Добавляем подкаталоги
+add_subdirectory(CLI)
+add_subdirectory(Network)
+add_subdirectory(Cache)
+
+# Создаём исполняемый файл
 add_executable(CachingProxy CachingProxy.cpp) 
 
-if(Boost_FOUND)
-  # Связываем вашу цель с программой options.
-  target_link_libraries(CachingProxy PUBLIC Boost::program_options)
-else()
-  message(FATAL_ERROR "Boost Program Options library not found. Please make sure Boost is installed and configured properly for CMake.")
-endif()
+
+# Указываем где лежат includes
+target_include_directories(CachingProxy PUBLIC 
+                           "${CMAKE_SOURCE_DIR}"
+                           Boost::asio 
+                           Boost::beast
+                          )
 
 
+# Связываем с нашими библиотеками и Boost
 target_link_libraries(CachingProxy PUBLIC 
                       CLI 
                       Cache
-                      )
-
-
-target_include_directories(CachingProxy PUBLIC 
-                          "${PROJECT_BINARY_DIR}"
-                          "${PROJECT_SOURCE_DIR}/CLI"
-                          "${PROJECT_SOURCE_DIR}/Cache"
-                          )
+                      Network
+                      Boost::program_options  
+                      Boost::system
+                     )

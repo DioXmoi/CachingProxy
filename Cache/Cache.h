@@ -15,6 +15,6 @@ public:
 	bool Contains(const std::string& key) const;
 
 private:
-	std::shared_mutex m_mutex;
+	mutable std::shared_mutex m_mutex;
 	std::unordered_map<std::string, std::string> m_data;
 };
