@@ -7,11 +7,11 @@
 
 Listener::Listener(net::io_context& ioc,
 	tcp::endpoint endpoint,
-	const std::string& origin,
+	net::ip::address origin,
 	std::shared_ptr<Cache> cache)
 	: m_ioc{ ioc }
 	, m_acceptor{ ioc, endpoint }
-	, m_origin{ origin }
+	, m_host{ origin }
 	, m_cache{ cache }
 {
 	beast::error_code ec;
@@ -69,7 +69,8 @@ void Listener::OnAccept(beast::error_code ec, tcp::socket&& socket) {
 		// Create the session and run it
 		std::make_shared<Session>(
 			std::move(socket),
-			m_cache) -> Run();
+			m_cache,
+			m_host) -> Run();
 	}
 
 	// Accept another connection

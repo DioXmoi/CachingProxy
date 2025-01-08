@@ -1,9 +1,10 @@
 #include "Session.h"
 
 
-Session::Session(tcp::socket&& sock, std::shared_ptr<Cache> cache) noexcept
+Session::Session(tcp::socket&& sock, std::shared_ptr<Cache> cache, net::ip::address origin) noexcept
 	: m_stream{ std::move(sock) }
 	, m_cache{ cache }
+	, m_host{ origin }
 {
 
 }
@@ -44,7 +45,7 @@ void Session::OnRead(beast::error_code ec, std::size_t bytes_transferred) {
 	}
 
 	// Send the response
-	SendResponse(HandleRequest(std::move(m_req), m_cache));
+	SendResponse(HandleRequest(std::move(m_req), m_cache, m_host));
 }
 
 void Session::SendResponse(http::message_generator&& msg) {

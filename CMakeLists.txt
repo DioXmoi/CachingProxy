@@ -44,7 +44,6 @@ find_package(Boost COMPONENTS
 # Добавляем подкаталоги
 add_subdirectory(CLI)
 add_subdirectory(Network)
-add_subdirectory(Cache)
 
 # Создаём исполняемый файл
 add_executable(CachingProxy CachingProxy.cpp) 
@@ -61,7 +60,6 @@ target_include_directories(CachingProxy PUBLIC
 # Связываем с нашими библиотеками и Boost
 target_link_libraries(CachingProxy PUBLIC 
                       CLI 
-                      Cache
                       Network
                       Boost::program_options  
                       Boost::system

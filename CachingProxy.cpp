@@ -21,16 +21,11 @@ int main(int argc, char* const argv[]) {
 
 	
 	std::shared_ptr<Cache> cache{ std::make_shared<Cache>() };
-
-
 	if (res.port && res.origin) {
 		// main logic proxy server
 		auto port{ static_cast<unsigned short>(res.port.value()) };
-		auto const address = net::ip::make_address("127.0.0.1");
-		auto origin{ res.origin.value() };
-
-		std::cout << std::format("Caching proxy server started on port {} and forwarding to {}\n", port, origin);
-
+		auto const address{ net::ip::make_address("127.0.0.1") };
+		auto origin{ net::ip::make_address(res.origin.value()) };
 	
 		net::io_context ioc{ };
 		std::make_shared<Listener>(
