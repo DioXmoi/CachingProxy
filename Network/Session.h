@@ -95,6 +95,10 @@ static inline http::message_generator Session::HandleRequest(
 		// Make the connection on the IP address we get from a lookup
 		stream.connect(endpoint);
 
+		
+		req.set(http::field::host, host);
+		std::cout << req << "\n";
+		
 		// Send the HTTP request to the remote host
 		http::write(stream, std::move(req));
 
@@ -107,6 +111,8 @@ static inline http::message_generator Session::HandleRequest(
 		res.set("X-Cache:", "MISS");
 
 		res.prepare_payload();
+
+		std::cout << res << "\n";
 
 		// 3 get è head we cache the methods
 		if (req.method() == beast::http::verb::get || req.method() == beast::http::verb::head) {
