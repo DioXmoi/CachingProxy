@@ -31,7 +31,7 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 // Handles an HTTP server connection
 class Session : public std::enable_shared_from_this<Session> {
 public:
-	Session(tcp::socket&& sock, std::shared_ptr<Cache> cache, net::ip::address origin) noexcept;
+	Session(tcp::socket&& sock, std::shared_ptr<Cache> cache, std::string origin) noexcept;
 
 	void Run();
 	
@@ -49,7 +49,7 @@ public:
 	static inline http::message_generator HandleRequest(
 		http::request<Body, http::basic_fields<Allocator>>&& req,
 		std::shared_ptr<Cache> cache,
-		net::ip::address origin);
+		std::string origin);
 
 private:
 
@@ -57,14 +57,14 @@ private:
 	beast::flat_buffer m_buffer;
 	http::request<http::string_body> m_req;
 	std::shared_ptr<Cache> m_cache;
-	net::ip::address m_host; //uri the server from which we cache responses
+	std::string m_host; //uri the server from which we cache responses
 };
 
 template <class Body, class Allocator>
 static inline http::message_generator Session::HandleRequest(
 	http::request<Body, http::basic_fields<Allocator>>&& req,
 	std::shared_ptr<Cache> cache, 
-	net::ip::address host) {
+	std::string host) {
 
 	// 1 Check in the cache, if there is, then give it immediately
 	std::string key{ std::string{ req.method_string() } + std::string{ req.target() } };
@@ -82,16 +82,18 @@ static inline http::message_generator Session::HandleRequest(
 		// The io_context is required for all I/O
 		net::io_context ioc;
 
-		// These objects perform our I/O
-		tcp::resolver resolver(ioc);
 		beast::tcp_stream stream(ioc);
 
-		// Look up the domain name
-		auto port{ "80" };
-		auto const results = resolver.resolve(host, port);
+
+		// DNS lookup
+		tcp::resolver resolver{ ioc };
+		tcp::resolver::query query(host, "80");
+		tcp::resolver::iterator iter = resolver.resolve(query);
+
+		tcp::endpoint endpoint = iter -> endpoint();
 
 		// Make the connection on the IP address we get from a lookup
-		stream.connect(tcp::endpoint{ host, port });
+		stream.connect(endpoint);
 
 		// Send the HTTP request to the remote host
 		http::write(stream, std::move(req));
@@ -102,7 +104,6 @@ static inline http::message_generator Session::HandleRequest(
 		// Receive the HTTP response
 		http::read(stream, buffer, res);
 
-		// Write the message to standard out
 		res.set("X-Cache:", "MISS");
 
 		res.prepare_payload();

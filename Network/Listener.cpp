@@ -7,7 +7,7 @@
 
 Listener::Listener(net::io_context& ioc,
 	tcp::endpoint endpoint,
-	net::ip::address origin,
+	std::string origin,
 	std::shared_ptr<Cache> cache)
 	: m_ioc{ ioc }
 	, m_acceptor{ ioc, endpoint }

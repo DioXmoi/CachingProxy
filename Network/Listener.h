@@ -24,7 +24,7 @@ class Listener : public std::enable_shared_from_this<Listener> {
 public:
 	Listener(net::io_context& ioc,
 		tcp::endpoint endpoint,
-		net::ip::address origin,
+		std::string origin,
 		std::shared_ptr<Cache> cache);
 
 	// Start accepting incoming connections
@@ -42,7 +42,7 @@ private:
 	tcp::acceptor m_acceptor;
 
 	//The URL of the server whose requests we cache
-	net::ip::address m_host;
+	std::string m_host;
 
 	std::shared_ptr<Cache> m_cache;
 };

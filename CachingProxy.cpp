@@ -25,8 +25,10 @@ int main(int argc, char* const argv[]) {
 		// main logic proxy server
 		auto port{ static_cast<unsigned short>(res.port.value()) };
 		auto const address{ net::ip::make_address("127.0.0.1") };
-		auto origin{ net::ip::make_address(res.origin.value()) };
-	
+		auto origin{ res.origin.value() };
+			
+		std::cout << "[SERVER] --port " << port << " --origin " << origin << "\n";
+
 		net::io_context ioc{ };
 		std::make_shared<Listener>(
 			ioc,
