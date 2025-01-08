@@ -108,8 +108,6 @@ static inline http::message_generator Session::HandleRequest(
 
 		res.prepare_payload();
 
-		std::cout << res << "\n"; // .............................................................................................................................. //
-
 		// 3 get è head we cache the methods
 		if (req.method() == beast::http::verb::get || req.method() == beast::http::verb::head) {
 			cache -> Set(key, res);
